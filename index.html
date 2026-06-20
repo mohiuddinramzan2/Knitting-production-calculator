@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<title>কাউন্টার ক্যালকুলেটর · সার্কুলার নিটিং</title>
+<link rel="manifest" href="manifest.json" />
+<meta name="theme-color" content="#0a0d13" />
+<link rel="icon" href="icon-192.png" />
+<link rel="apple-touch-icon" href="icon-192.png" />
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+  :root{
+    --bg:#0a0d13;
+    --bg-grid: #11151d;
+    --panel:#12161f;
+    --panel-2:#171c28;
+    --border:#242b39;
+    --border-soft:#1b212d;
+    --text:#edf0f6;
+    --muted:#7d869b;
+    --muted-2:#586071;
+    --accent:#f5a623;
+    --accent-soft:#f5a62333;
+    --accent-2:#3ad1c4;
+    --accent-2-soft:#3ad1c42b;
+    --danger:#f0586a;
+    --good:#34d399;
+    --radius:18px;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+
+  body{
+    background-color:var(--bg);
+    background-image:
+      radial-gradient(circle at 1px 1px, #ffffff0d 1px, transparent 1px);
+    background-size: 22px 22px;
+    color:var(--text);
+    font-family:'Noto Sans Bengali','Inter',system-ui,-apple-system,sans-serif;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.05s !important;}
+  }
+
+  .mono{ font-family:'JetBrains Mono', ui-monospace, monospace; }
+
+  .app{
+    width:100%;
+    max-width:480px;
+    padding:28px 18px 60px;
+  }
+
+  /* ---------- Header ---------- */
+  header{ text-align:center; margin-bottom:26px; }
+
+  .eyebrow{
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    padding:6px 14px;
+    border:1px solid var(--border);
+    border-radius:999px;
+    background:var(--panel);
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    letter-spacing:.14em;
+    color:var(--accent);
+    margin-bottom:16px;
+  }
+  .eyebrow .dot{
+    width:6px;height:6px;border-radius:50%;
+    background:var(--accent);
+    box-shadow:0 0 0 3px var(--accent-soft);
+  }
+
+  h1{
+    font-size:26px;
+    font-weight:800;
+    margin:0 0 6px;
+    letter-spacing:-0.01em;
+  }
+  header p{
+    margin:0;
+    color:var(--muted);
+    font-size:13px;
+    font-family:'JetBrains Mono',monospace;
+    letter-spacing:.08em;
+  }
+
+  /* ---------- Cards ---------- */
+  .card{
+    background:linear-gradient(180deg, var(--panel) 0%, var(--panel) 100%);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:22px 20px;
+    margin-bottom:18px;
+    position:relative;
+    overflow:hidden;
+  }
+  .card::before{
+    content:"";
+    position:absolute; top:0; left:0; right:0; height:1px;
+    background:linear-gradient(90deg, transparent, #ffffff14, transparent);
+  }
+
+  .card-head{
+    display:flex;
+    align-items:center;
+    gap:9px;
+    margin-bottom:18px;
+  }
+  .card-head .ico{
+    width:26px;height:26px;
+    border-radius:8px;
+    display:flex;align-items:center;justify-content:center;
+    background:var(--accent-soft);
+    color:var(--accent);
+    font-size:14px;
+    flex-shrink:0;
+  }
+  .card-head h2{
+    font-size:14px;
+    font-weight:700;
+    margin:0;
+    flex:1;
+  }
+  .card-head .rule{
+    flex:1;
+    height:1px;
+    background:var(--border-soft);
+  }
+
+  .field{ margin-bottom:14px; }
+  .field:last-child{ margin-bottom:0; }
+  .field-label{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    margin-bottom:7px;
+    font-size:13px;
+    color:#c7cee0;
+  }
+  .field-label .unit{
+    font-family:'JetBrains Mono',monospace;
+    font-size:10.5px;
+    color:var(--muted-2);
+    letter-spacing:.06em;
+  }
+
+  input[type="number"]{
+    width:100%;
+    background:var(--bg-grid);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:13px 14px;
+    color:var(--text);
+    font-family:'JetBrains Mono',monospace;
+    font-size:18px;
+    outline:none;
+    transition:border-color .15s, box-shadow .15s;
+    -moz-appearance:textfield;
+  }
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button{
+    -webkit-appearance:none; margin:0;
+  }
+  input[type="number"]:focus{
+    border-color:var(--accent);
+    box-shadow:0 0 0 3px var(--accent-soft);
+  }
+
+  .grid-2{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+  }
+
+  /* ---------- Dial selector ---------- */
+  .dial-wrap{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:6px 0 4px;
+  }
+  .dial{
+    position:relative;
+    width:220px;
+    height:220px;
+    margin-bottom:8px;
+  }
+  .dial-ticks{
+    position:absolute; inset:0;
+    border-radius:50%;
+    background:repeating-conic-gradient(
+      var(--accent) 0deg 1.6deg,
+      transparent 1.6deg 11.25deg
+    );
+    opacity:.35;
+    animation:spin 70s linear infinite;
+  }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+
+  .dial-face{
+    position:absolute; inset:16px;
+    border-radius:50%;
+    background:radial-gradient(circle at 50% 38%, var(--panel-2), var(--panel) 72%);
+    border:1px solid var(--border);
+    box-shadow: inset 0 0 0 1px #ffffff08, inset 0 14px 30px #00000066;
+  }
+  .dial-center-label{
+    position:absolute; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    text-align:center;
+    flex-direction:column;
+    gap:2px;
+    padding:0 50px;
+  }
+  .dial-center-label .fab-name{
+    font-size:15px;
+    font-weight:700;
+  }
+  .dial-center-label .fab-sub{
+    font-size:9.5px;
+    font-family:'JetBrains Mono',monospace;
+    letter-spacing:.1em;
+    color:var(--muted-2);
+  }
+
+  .needle{
+    position:absolute;
+    left:50%; top:50%;
+    width:4px; height:72px;
+    background:linear-gradient(180deg, var(--accent), #f5a62300);
+    border-radius:3px;
+    transform-origin:50% 100%;
+    transform: translate(-50%,-100%) rotate(var(--angle, 0deg));
+    transition: transform .55s cubic-bezier(.22,.9,.24,1);
+    filter: drop-shadow(0 0 6px var(--accent-soft));
+  }
+  .pivot{
+    position:absolute; left:50%; top:50%;
+    width:11px; height:11px;
+    margin:-5.5px 0 0 -5.5px;
+    border-radius:50%;
+    background:var(--accent);
+    box-shadow:0 0 0 4px var(--accent-soft);
+  }
+
+  .dial-btn{
+    position:absolute;
+    transform:translate(-50%,-50%);
+    padding:7px 12px;
+    border-radius:999px;
+    border:1px solid var(--border);
+    background:var(--bg-grid);
+    color:var(--muted);
+    font-size:12px;
+    font-weight:600;
+    cursor:pointer;
+    white-space:nowrap;
+    transition: all .2s;
+  }
+  .dial-btn.b0{ left:50%; top:6%; transform:translate(-50%,0); }
+  .dial-btn.b1{ left:88%; top:73%; }
+  .dial-btn.b2{ left:12%; top:73%; }
+  .dial-btn.active{
+    background:var(--accent-soft);
+    border-color:var(--accent);
+    color:var(--accent);
+    box-shadow:0 0 0 3px var(--accent-soft);
+  }
+  .dial-btn:hover{ color:var(--text); }
+
+  /* ---------- Auto readouts (needle / fitter) ---------- */
+  .auto-box{
+    background:var(--bg-grid);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:13px 14px;
+  }
+  .auto-box .formula{
+    font-family:'JetBrains Mono',monospace;
+    font-size:10.5px;
+    color:var(--muted-2);
+    margin-bottom:5px;
+    letter-spacing:.02em;
+  }
+  .auto-box .value{
+    font-family:'JetBrains Mono',monospace;
+    font-size:20px;
+    font-weight:600;
+    color:var(--accent-2);
+  }
+
+  .fitter-row{
+    display:grid;
+    grid-template-columns:1fr auto;
+    gap:12px;
+    align-items:stretch;
+  }
+  .miss-box{
+    background:var(--bg-grid);
+    border:1px solid #f0586a3a;
+    border-radius:12px;
+    padding:10px 12px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    min-width:128px;
+  }
+  .miss-box .miss-label{
+    font-size:10px;
+    color:var(--danger);
+    font-family:'JetBrains Mono',monospace;
+    letter-spacing:.05em;
+    text-align:center;
+  }
+  .stepper{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .stepper button{
+    width:30px;height:30px;
+    border-radius:9px;
+    border:1px solid var(--border);
+    background:var(--panel-2);
+    color:var(--text);
+    font-size:16px;
+    line-height:1;
+    cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    transition:.15s;
+  }
+  .stepper button.minus:hover{ border-color:var(--danger); color:var(--danger); }
+  .stepper button.plus:hover{ border-color:var(--good); color:var(--good); }
+  .stepper .count{
+    font-family:'JetBrains Mono',monospace;
+    font-size:16px;
+    font-weight:700;
+    min-width:18px;
+    text-align:center;
+  }
+  .usable-note{
+    margin-top:10px;
+    font-size:11.5px;
+    color:var(--muted);
+  }
+  .usable-note b{ color:var(--text); font-family:'JetBrains Mono',monospace; }
+
+  /* ---------- Yarn panels ---------- */
+  .yarn-panel{ display:none; }
+  .yarn-panel.show{ display:block; }
+  .hint{
+    font-size:11px;
+    color:var(--muted-2);
+    margin-top:6px;
+    line-height:1.5;
+  }
+
+  /* ---------- Button ---------- */
+  .calc-btn{
+    width:100%;
+    border:none;
+    border-radius:16px;
+    padding:18px;
+    font-size:16px;
+    font-weight:700;
+    color:#0a0d13;
+    background:linear-gradient(180deg, #ffc04d, var(--accent));
+    cursor:pointer;
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    box-shadow:0 10px 24px -8px #f5a62366;
+    transition:transform .15s, box-shadow .15s;
+  }
+  .calc-btn:active{ transform:translateY(1px) scale(.99); }
+  .calc-btn svg{ width:16px;height:16px; }
+
+  /* ---------- Result ---------- */
+  .result-card{
+    border:1px solid var(--accent);
+    background:radial-gradient(circle at 30% 0%, #f5a62318, var(--panel) 60%);
+    margin-top:18px;
+  }
+  .result-card.empty{
+    border-color:var(--border);
+    background:var(--panel);
+  }
+  .result-label{
+    font-size:12px;
+    color:var(--muted);
+    margin-bottom:4px;
+  }
+  .result-main{
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+    margin-bottom:4px;
+  }
+  .result-main .num{
+    font-family:'JetBrains Mono',monospace;
+    font-size:52px;
+    font-weight:700;
+    color:var(--text);
+    letter-spacing:-0.02em;
+    line-height:1;
+  }
+  .result-main .label{
+    font-size:14px;
+    color:var(--accent);
+    font-weight:600;
+  }
+  .result-precise{
+    font-family:'JetBrains Mono',monospace;
+    font-size:13px;
+    color:var(--muted);
+    margin-bottom:18px;
+  }
+  .result-stats{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-bottom:14px;
+  }
+  .stat{
+    background:var(--bg-grid);
+    border:1px solid var(--border-soft);
+    border-radius:12px;
+    padding:11px 13px;
+  }
+  .stat .s-label{
+    font-size:10.5px;
+    color:var(--muted-2);
+    font-family:'JetBrains Mono',monospace;
+    margin-bottom:4px;
+  }
+  .stat .s-value{
+    font-family:'JetBrains Mono',monospace;
+    font-size:15px;
+    font-weight:600;
+    color:var(--accent-2);
+  }
+  .breakdown{
+    font-size:11px;
+    color:var(--muted);
+    font-family:'JetBrains Mono',monospace;
+    line-height:1.7;
+    border-top:1px dashed var(--border-soft);
+    padding-top:12px;
+  }
+  .breakdown span{ color:#aab3c5; }
+  .warn{
+    color:var(--danger);
+    font-size:12.5px;
+    margin-top:8px;
+  }
+
+  footer{
+    text-align:center;
+    color:var(--muted-2);
+    font-size:11px;
+    margin-top:26px;
+    line-height:1.7;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <div class="eyebrow"><span class="dot"></span> CIRCULAR&nbsp;KNITTING&nbsp;·&nbsp;PRODUCTION&nbsp;TOOL</div>
+    <h1>কাউন্টার ক্যালকুলেটর</h1>
+    <p>FABRIC&nbsp;WEIGHT&nbsp;→&nbsp;MACHINE&nbsp;COUNTER</p>
+  </header>
+
+  <!-- FABRIC TYPE DIAL -->
+  <div class="card">
+    <div class="card-head">
+      <div class="ico">⊙</div>
+      <h2>ফেব্রিক টাইপ নির্বাচন করুন</h2>
+      <div class="rule"></div>
+    </div>
+    <div class="dial-wrap">
+      <div class="dial">
+        <div class="dial-ticks"></div>
+        <div class="dial-face"></div>
+        <div class="dial-center-label">
+          <div class="fab-name" id="fabName">সিঙ্গেল জার্সি</div>
+          <div class="fab-sub" id="fabSub">SINGLE JERSEY</div>
+        </div>
+        <div class="needle" id="needlePointer" style="--angle:0deg;"></div>
+        <div class="pivot"></div>
+        <button class="dial-btn b0 active" data-fab="sj" data-angle="0">সিঙ্গেল জার্সি</button>
+        <button class="dial-btn b1" data-fab="terry" data-angle="120">টেরি</button>
+        <button class="dial-btn b2" data-fab="fleece" data-angle="240">ফ্লিস</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TARGET -->
+  <div class="card">
+    <div class="card-head">
+      <div class="ico">◎</div>
+      <h2>লক্ষ্য মাত্রা</h2>
+      <div class="rule"></div>
+    </div>
+    <div class="field">
+      <div class="field-label"><span>কত কেজি ফেব্রিক চাই?</span><span class="unit">KG</span></div>
+      <input type="number" id="kg" value="20" min="0" step="0.01" inputmode="decimal" />
+    </div>
+  </div>
+
+  <!-- MACHINE SETTINGS -->
+  <div class="card">
+    <div class="card-head">
+      <div class="ico">⚙</div>
+      <h2>মেশিন সেটিংস</h2>
+      <div class="rule"></div>
+    </div>
+
+    <div class="grid-2">
+      <div class="field">
+        <div class="field-label"><span>মেশিন ডায়া</span><span class="unit">INCH</span></div>
+        <input type="number" id="dia" value="30" min="0" step="0.1" inputmode="decimal" />
+      </div>
+      <div class="field">
+        <div class="field-label"><span>নিডেল গেজ</span><span class="unit">GG</span></div>
+        <input type="number" id="gauge" value="24" min="0" step="0.5" inputmode="decimal" />
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label"><span>নিডেল সংখ্যা</span><span class="unit">AUTO</span></div>
+      <div class="auto-box">
+        <div class="formula">3.14 × ডায়া × গেজ</div>
+        <div class="value" id="needleOut">—</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label"><span>ফিটার</span><span class="unit">AUTO · মিস হলে মাইনাস করুন</span></div>
+      <div class="fitter-row">
+        <div class="auto-box">
+          <div class="formula">(ডায়া × ৩) + ৬</div>
+          <div class="value" id="fitterAutoOut">—</div>
+        </div>
+        <div class="miss-box">
+          <div class="miss-label">মিস ফিটার</div>
+          <div class="stepper">
+            <button class="minus" id="missMinus" type="button">−</button>
+            <span class="count" id="missCount">0</span>
+            <button class="plus" id="missPlus" type="button">+</button>
+          </div>
+        </div>
+      </div>
+      <div class="usable-note">ব্যবহারযোগ্য ফিটার (গণনায় ব্যবহৃত): <b id="usableFitterOut">—</b></div>
+    </div>
+  </div>
+
+  <!-- YARN INFO : SINGLE JERSEY -->
+  <div class="card yarn-panel show" id="panel-sj">
+    <div class="card-head">
+      <div class="ico">🧵</div>
+      <h2>সুতার তথ্য — সিঙ্গেল জার্সি</h2>
+      <div class="rule"></div>
+    </div>
+    <div class="grid-2">
+      <div class="field">
+        <div class="field-label"><span>সুতার কাউন্ট</span><span class="unit">NE</span></div>
+        <input type="number" id="sj-count" value="18" min="0" step="0.1" inputmode="decimal" />
+      </div>
+      <div class="field">
+        <div class="field-label"><span>স্টিচ লেন্থ</span><span class="unit">MM</span></div>
+        <input type="number" id="sj-sl" value="35" min="0" step="0.1" inputmode="decimal" />
+      </div>
+    </div>
+  </div>
+
+  <!-- YARN INFO : TERRY -->
+  <div class="card yarn-panel" id="panel-terry">
+    <div class="card-head">
+      <div class="ico">🧵</div>
+      <h2>সুতার তথ্য — টেরি</h2>
+      <div class="rule"></div>
+    </div>
+    <div class="grid-2">
+      <div class="field">
+        <div class="field-label"><span>লেকরা ডেনিয়ার</span><span class="unit">DENIER</span></div>
+        <input type="number" id="terry-denier" value="40" min="0" step="0.1" inputmode="decimal" />
+      </div>
+      <div class="field">
+        <div class="field-label"><span>সুতার কাউন্ট</span><span class="unit">NE</span></div>
+        <input type="number" id="terry-count" value="28" min="0" step="0.1" inputmode="decimal" />
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="field">
+        <div class="field-label"><span>পলি স্টিচ লেন্থ ১</span><span class="unit">MM</span></div>
+        <input type="number" id="terry-sl1" value="22" min="0" step="0.1" inputmode="decimal" />
+      </div>
+      <div class="field">
+        <div class="field-label"><span>পলি স্টিচ লেন্থ ২</span><span class="unit">MM</span></div>
+        <input type="number" id="terry-sl2" value="22" min="0" step="0.1" inputmode="decimal" />
+      </div>
+    </div>
+    <div class="hint">সুতার ফ্যাক্টর = (5314.9 ÷ লেকরা ডেনিয়ার) − সুতার কাউন্ট। স্টিচ লেন্থ = দুইটা পলি SL এর যোগফল।</div>
+  </div>
+
+  <!-- YARN INFO : FLEECE -->
+  <div class="card yarn-panel" id="panel-fleece">
+    <div class="card-head">
+      <div class="ico">🧵</div>
+      <h2>সুতার তথ্য — ফ্লিস</h2>
+      <div class="rule"></div>
+    </div>
+    <div class="grid-2">
+      <div class="field">
+        <div class="field-label"><span>পলিস্টার কাউন্ট</span><span class="unit">NE</span></div>
+        <input type="number" id="fl-poly" value="75" min="0" step="0.1" inputmode="decimal" />
+      </div>
+      <div class="field">
+        <div class="field-label"><span>লুপের সুতা</span><span class="unit">NE</span></div>
+        <input type="number" id="fl-loop" value="40" min="0" step="0.1" inputmode="decimal" />
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="field">
+        <div class="field-label"><span>নিটের সুতা</span><span class="unit">NE</span></div>
+        <input type="number" id="fl-knit" value="41.298" min="0" step="0.001" inputmode="decimal" />
+      </div>
+      <div class="field">
+        <div class="field-label"><span>স্টিচ লেন্থ</span><span class="unit">MM</span></div>
+        <input type="number" id="fl-sl" value="90.2" min="0" step="0.1" inputmode="decimal" />
+      </div>
+    </div>
+    <div class="hint">সুতার ফ্যাক্টর = পলিস্টার + লুপের সুতা + নিটের সুতার যোগফল।</div>
+  </div>
+
+  <button class="calc-btn" id="calcBtn" type="button">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 3l14 9-14 9V3z"/></svg>
+    কাউন্টার বের করো
+  </button>
+
+  <!-- RESULT -->
+  <div class="card result-card empty" id="resultCard">
+    <div class="result-label">প্রয়োজনীয় কাউন্টার</div>
+    <div class="result-main">
+      <span class="num mono" id="resultNum">—</span>
+      <span class="label">বার</span>
+    </div>
+    <div class="result-precise" id="resultPrecise">ইনপুট দিয়ে নিচের বাটনে চাপুন</div>
+
+    <div class="result-stats">
+      <div class="stat">
+        <div class="s-label">প্রতি কাউন্টারে উৎপাদন</div>
+        <div class="s-value" id="kgPerCounter">— কেজি</div>
+      </div>
+      <div class="stat">
+        <div class="s-label">ব্যবহৃত নিডেল / ফিটার</div>
+        <div class="s-value" id="needleFitterUsed">— / —</div>
+      </div>
+    </div>
+
+    <div class="breakdown" id="breakdown">গণনার বিস্তারিত এখানে দেখা যাবে।</div>
+  </div>
+
+  <footer>
+    মিস ফিটার থাকলে স্টেপারে মাইনাস করুন, ব্যবহারযোগ্য ফিটার সেই হিসাবেই আপডেট হবে।<br/>
+    সব মান প্রতিবার ইনপুট পরিবর্তনের সাথে সাথে লাইভ আপডেট হয়।
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  const CONST = {
+    sj: 16936517,
+    terry: 8533792,
+    fleece: 11251982.42
+  };
+  const ANGLES = { sj:0, terry:120, fleece:240 };
+  const NAMES = {
+    sj: ["সিঙ্গেল জার্সি", "SINGLE JERSEY"],
+    terry: ["টেরি", "TERRY FABRIC"],
+    fleece: ["ফ্লিস", "FLEECE FABRIC"]
+  };
+
+  let fabric = 'sj';
+  let missFitter = 0;
+
+  const $ = id => document.getElementById(id);
+  const num = id => {
+    const v = parseFloat($(id).value);
+    return isNaN(v) ? null : v;
+  };
+
+  function fmt(n, d){
+    if(n === null || n === undefined || isNaN(n) || !isFinite(n)) return '—';
+    return n.toLocaleString('en-US', { maximumFractionDigits: d===undefined?2:d, minimumFractionDigits:0 });
+  }
+
+  // ---- dial selection ----
+  document.querySelectorAll('.dial-btn').forEach(btn=>{
+    btn.addEventListener('click', () => {
+      fabric = btn.dataset.fab;
+      document.querySelectorAll('.dial-btn').forEach(b=>b.classList.toggle('active', b===btn));
+      $('needlePointer').style.setProperty('--angle', ANGLES[fabric] + 'deg');
+      $('fabName').textContent = NAMES[fabric][0];
+      $('fabSub').textContent = NAMES[fabric][1];
+      document.querySelectorAll('.yarn-panel').forEach(p=>p.classList.remove('show'));
+      $('panel-' + fabric).classList.add('show');
+      calculate();
+    });
+  });
+
+  // ---- miss fitter stepper ----
+  $('missMinus').addEventListener('click', () => {
+    if(missFitter > 0){ missFitter--; $('missCount').textContent = missFitter; calculate(); }
+  });
+  $('missPlus').addEventListener('click', () => {
+    missFitter++; $('missCount').textContent = missFitter; calculate();
+  });
+
+  function calculate(){
+    const kg = num('kg');
+    const dia = num('dia');
+    const gauge = num('gauge');
+
+    const needles = (dia !== null && gauge !== null) ? (3.14 * gauge * dia) : null;
+    const fitterAuto = (dia !== null) ? (dia * 3 + 6) : null;
+    const usableFitter = (fitterAuto !== null) ? Math.max(fitterAuto - missFitter, 1) : null;
+
+    $('needleOut').textContent = needles !== null ? fmt(needles,1) : '—';
+    $('fitterAutoOut').textContent = fitterAuto !== null ? fmt(fitterAuto,0) : '—';
+    $('usableFitterOut').textContent = usableFitter !== null ? fmt(usableFitter,0) : '—';
+
+    let yarnFactor = null, stitchLength = null, constant = CONST[fabric];
+    let breakdownExtra = '';
+
+    if(fabric === 'sj'){
+      const count = num('sj-count');
+      stitchLength = num('sj-sl');
+      yarnFactor = count;
+      breakdownExtra = `সুতার কাউন্ট: <span>${fmt(count,2)}</span>`;
+    } else if(fabric === 'terry'){
+      const denier = num('terry-denier');
+      const count = num('terry-count');
+      const sl1 = num('terry-sl1');
+      const sl2 = num('terry-sl2');
+      stitchLength = (sl1!==null && sl2!==null) ? sl1+sl2 : null;
+      yarnFactor = (denier!==null && count!==null) ? (5314.9/denier - count) : null;
+      breakdownExtra = `সুতার ফ্যাক্টর (5314.9÷${fmt(denier,1)}−${fmt(count,2)}): <span>${fmt(yarnFactor,4)}</span> · স্টিচ লেন্থ যোগফল: <span>${fmt(stitchLength,2)}</span>`;
+    } else {
+      const poly = num('fl-poly');
+      const loop = num('fl-loop');
+      const knit = num('fl-knit');
+      stitchLength = num('fl-sl');
+      yarnFactor = (poly!==null && loop!==null && knit!==null) ? poly+loop+knit : null;
+      breakdownExtra = `সুতার ফ্যাক্টর (পলিস্টার+লুপ+নিট): <span>${fmt(yarnFactor,3)}</span>`;
+    }
+
+    const resultCard = $('resultCard');
+    const ready = kg!==null && needles && needles>0 && usableFitter && usableFitter>0 &&
+                  stitchLength && stitchLength>0 && yarnFactor!==null && !isNaN(yarnFactor);
+
+    if(!ready){
+      resultCard.classList.add('empty');
+      $('resultNum').textContent = '—';
+      $('resultPrecise').textContent = 'সব মান পূরণ করুন';
+      $('kgPerCounter').textContent = '— কেজি';
+      $('needleFitterUsed').textContent = '— / —';
+      $('breakdown').innerHTML = 'গণনার বিস্তারিত এখানে দেখা যাবে।';
+      return;
+    }
+
+    const counters = (kg * constant * yarnFactor) / stitchLength / needles / usableFitter;
+    const negative = counters < 0;
+
+    resultCard.classList.remove('empty');
+    $('resultNum').textContent = negative ? '—' : fmt(Math.round(counters), 0);
+    $('resultPrecise').textContent = negative
+      ? 'ইনপুট মান চেক করুন (ফলাফল ঋণাত্মক এসেছে)'
+      : `≈ ${fmt(counters,2)} বার · ${fmt(kg,2)} কেজি ফেব্রিকের জন্য`;
+    $('kgPerCounter').textContent = negative ? '—' : `${fmt(kg/counters, 4)} কেজি`;
+    $('needleFitterUsed').textContent = `${fmt(needles,1)} / ${fmt(usableFitter,0)}`;
+
+    $('breakdown').innerHTML =
+      `নিডেল: <span>${fmt(needles,1)}</span> · ` +
+      `ফিটার (অটো ${fmt(fitterAuto,0)} − মিস ${missFitter}): <span>${fmt(usableFitter,0)}</span><br/>` +
+      breakdownExtra;
+  }
+
+  // live recalc on any input
+  document.querySelectorAll('input[type="number"]').forEach(inp => {
+    inp.addEventListener('input', calculate);
+  });
+  $('calcBtn').addEventListener('click', () => {
+    calculate();
+    $('resultCard').scrollIntoView({ behavior:'smooth', block:'center' });
+  });
+
+  calculate();
+
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    });
+  }
+})();
+</script>
+</body>
+</html>
